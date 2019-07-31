@@ -101,20 +101,18 @@ class SayItAgain(MQTTSnipsApp):
                                       i18n.RESULT_TEXT_CAFE_NETTOIE))
     
     @topic(INTENT_VAPEUR )
-    def handle_intent_nettoie(self, topic, payload):
+    def handle_intent_vapeur(self, topic, payload):
         self.publish(*end_session(payload["sessionId"],
                                       i18n.RESULT_TEXT_CAFE_VAPEUR))
     
     
     @topic(INTENT_CAFE_IO)
-    def handle_intent_nettoie(self, topic, payload):
+    def handle_intent_io(self, topic, payload):
         self.publish(*end_session(payload["sessionId"],
                                       i18n.RESULT_TEXT_CAFE_IO))
         
     @topic(INTENT_VERSER)
-    def handle_intent_nettoie(self, topic, payload):
-        self.publish(*end_session(payload["sessionId"],
-                                      i18n.RESULT_TEXT_CAFE_IO))    
+    def handle_intent_verser(self, topic, payload):  
         t = extract_type_cafe(intent_message)
         s = extract_taille_cafe(intent_message)
         ta = extract_intensite_cafe(intent_message)
