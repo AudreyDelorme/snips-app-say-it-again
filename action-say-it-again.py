@@ -23,6 +23,24 @@ INTENT_ALL = "hermes/intent/#"
 # Use the assistant's language.
 i18n = importlib.import_module('translations.' + SnipsAppMixin().assistant['language'])
 
+#Result sentences coffee
+RESULT_SAY_MAX = "Je n'ai la capacité de vous faire que deux cafés maximum, sinon va chez starbucks !"
+RESULT_TEXT_UN_CAFE = "Et c'est parti pour un café"
+RESULT_TEXT_CAFE_LONGUEUR = "Je vais vous servir un {2} café."
+RESULT_TEXT_DEUX_CAFES = "Je vous prépare tout de suite deux cafés"
+RESULT_TEXT_CAFES_LONGUEUR = "Je vais vous servir deux {2} café."
+RESULT_TEXT_CAFE_IO = "Haaaaaaaa, pardon je viens de bailler"
+RESULT_TEXT_CAFE_NETTOIE = "je me rince, merci de patienter"
+RESULT_TEXT_CAFE_VAPEUR = "attention je vais faire de la vapeur.... tchou tchou ! "
+
+
+#intents
+INTENT_NETTOIE = "hermes/intent/Tealque:Nettoie2"
+INTENT_VAPEUR = "hermes/intent/Tealque:Vapeur2"
+INTENT_VERSER = "hermes/intent/Tealque:Verser2"
+INTENT_CAFE_IO = "hermes/intent/Tealque:Cafe_io2"
+
+
 
 class SayItAgain(MQTTSnipsApp):
     """
@@ -75,7 +93,54 @@ class SayItAgain(MQTTSnipsApp):
         # times. Not ignoring it might create an endless loop!
         if topic != i18n.INTENT_REPEAT_ACTION:
             self.last_intent[payload["siteId"]] = (topic, payload)
-
+    ###############################
+    
+    @topic(INTENT_NETTOIE)
+    def handle_intent_nettoie(self, topic, payload):
+        self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_TEXT_CAFE_NETTOIE))
+    
+    @topic(INTENT_VAPEUR )
+    def handle_intent_nettoie(self, topic, payload):
+        self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_TEXT_CAFE_VAPEUR))
+    
+    
+    @topic(INTENT_CAFE_IO)
+    def handle_intent_nettoie(self, topic, payload):
+        self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_TEXT_CAFE_IO))
+        
+    @topic(INTENT_VERSER)
+    def handle_intent_nettoie(self, topic, payload):
+        self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_TEXT_CAFE_IO))    
+        t = extract_type_cafe(intent_message)
+        s = extract_taille_cafe(intent_message)
+        ta = extract_intensite_cafe(intent_message)
+        n = extract_nombre_cafe(intent_message)
+        type_cafe = t[0] if len(t) else ""
+        taille_cafe = s[0] if len(s) else ""
+        intensite_cafe = ta[0] if len(ta) else ""
+        number = 1
+        if len(n):
+            try:
+                number = int(n[0])
+                if number == 1 :
+                    self.publish(*end_session(payload["sessionId"],
+                                         i18n.RESULT_TEXT_UN_CAFE ))
+                else if number == 2 :
+                    self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_TEXT_DEUX_CAFES )) 
+                else : 
+                    self.publish(*end_session(payload["sessionId"],
+                                      i18n.RESULT_SAY_MAX))
+            except ValueError, e:
+                self.publish(*end_session(payload["sessionId"],
+                                         i18n.RESULT_TEXT_UN_CAFE ))  
+    
+    
+    ###############################
     @topic(i18n.INTENT_REPEAT_ACTION)
     def handle_repeat_action(self, topic, payload):
         """Get the last captured intent and repeat."""
